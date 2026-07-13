@@ -36,6 +36,7 @@
     "db",
     "drizzle.config.ts",
     "examples",
+    "work",
     "worker"
   ]
 }
