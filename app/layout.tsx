@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const metadataBase = new URL(`${protocol}://${host}`);
   const title = "Israel Property Partners | Real Estate Advisory in Israel";
-  const description = "End-to-end real estate investment guidance for international buyers in Israel—from opportunity sourcing to long-term property management.";
+  const description = "Complete real estate investment guidance for international buyers in Israel, from opportunity sourcing to long-term property management.";
 
   return {
     metadataBase,
