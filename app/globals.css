@@ -99,6 +99,8 @@ h2 { margin:0; font-size:clamp(40px,5vw,66px); line-height:1.05; }
 .field-row { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
 .contact-form .button { justify-self:start; margin-top:5px; }
 .contact-form small { color:rgba(255,255,255,.55); font-size:11px; line-height:1.5; }
+.contact-form .honeypot { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; }
+.contact-form button:disabled { opacity:.72; cursor:wait; }
 footer { background:#04131f; color:#fff; padding:55px 0 32px; }
 .footer-top { display:grid; grid-template-columns:1fr 1fr auto; gap:30px; align-items:center; }
 .footer-brand { max-width:240px; }

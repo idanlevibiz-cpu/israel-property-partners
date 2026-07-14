@@ -74,7 +74,7 @@ const content = {
     contactTitle: "Your Israel investment deserves a local partner.",
     contactText:
       "Tell us what brings you to Israel and what you hope to achieve. We will begin with a discreet, no-obligation conversation.",
-    form: { name: "Full name", email: "Email address", phone: "Phone / WhatsApp", message: "What are you looking for?", submit: "Request a private consultation", note: "Your information is treated with discretion.", success: "Thank you. Your request has been prepared. We’ll be in touch once contact delivery is connected." },
+    form: { name: "Full name", email: "Email address", phone: "Phone / WhatsApp", message: "What are you looking for?", submit: "Request a private consultation", sending: "Sending...", note: "Your information is treated with discretion.", success: "Thank you. Your message was sent successfully. We’ll be in touch soon.", error: "We could not send your message. Please try again." },
     footer: "Israel Property Partners",
     footerText: "End-to-end real estate advisory for international buyers in Israel.",
     disclaimer:
@@ -138,7 +138,7 @@ const content = {
     contactKicker: "מתחילים בשיחה",
     contactTitle: "להשקעה שלכם בישראל מגיע שותף מקומי.",
     contactText: "ספרו לנו מה מחבר אתכם לישראל ומה תרצו להשיג. נתחיל בשיחה אישית, דיסקרטית וללא התחייבות.",
-    form: { name: "שם מלא", email: "כתובת אימייל", phone: "טלפון / WhatsApp", message: "איזה נכס אתם מחפשים?", submit: "לתיאום שיחה אישית", note: "הפרטים שלכם נשמרים בדיסקרטיות.", success: "תודה. הבקשה הוכנה. נוכל ליצור קשר לאחר חיבור אמצעי קבלת הפניות." },
+    form: { name: "שם מלא", email: "כתובת אימייל", phone: "טלפון / WhatsApp", message: "איזה נכס אתם מחפשים?", submit: "לתיאום שיחה אישית", sending: "שולח...", note: "הפרטים שלכם נשמרים בדיסקרטיות.", success: "תודה. ההודעה נשלחה בהצלחה. נחזור אליכם בהקדם.", error: "לא הצלחנו לשלוח את ההודעה. נסו שוב." },
     footer: "Israel Property Partners",
     footerText: "ליווי נדל״ן מקצה לקצה לתושבי חוץ הרוכשים בישראל.",
     disclaimer: "המידע באתר הוא כללי ואינו מהווה ייעוץ השקעות, משפטי, מיסויי או פיננסי. הזדמנויות, מימון ותוצאות משתנים. שווי נכסים עשוי לעלות או לרדת ואין הבטחה לתשואה. לפני כל עסקה נדרשים ייעוץ מקצועי עצמאי ובדיקת נאותות.",
@@ -148,13 +148,29 @@ const content = {
 export default function Home() {
   const [lang, setLang] = useState<Language>("en");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const t = useMemo(() => content[lang], [lang]);
   const isHe = lang === "he";
 
-  function submitForm(event: FormEvent<HTMLFormElement>) {
+  async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
+    const form = event.currentTarget;
+    setFormStatus("sending");
+
+    try {
+      const payload = Object.fromEntries(new FormData(form).entries());
+      const response = await fetch("https://formsubmit.co/ajax/liran12levi@gmail.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Form submission failed");
+      setFormStatus("success");
+      form.reset();
+    } catch {
+      setFormStatus("error");
+    }
   }
 
   return (
@@ -249,11 +265,15 @@ export default function Home() {
         <div className="wrap contact-layout">
           <div><p className="kicker light">{t.contactKicker}</p><h2>{t.contactTitle}</h2><p>{t.contactText}</p></div>
           <form onSubmit={submitForm} className="contact-form">
+            <input type="hidden" name="_subject" value="New lead from Israel Property Partners" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_url" value="https://israel-property-partners.vercel.app/#contact" />
+            <input className="honeypot" type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden="true" />
             <div className="field-row"><label><span>{t.form.name}</span><input required name="name" autoComplete="name" /></label><label><span>{t.form.email}</span><input required type="email" name="email" autoComplete="email" /></label></div>
             <label><span>{t.form.phone}</span><input required name="phone" autoComplete="tel" /></label>
             <label><span>{t.form.message}</span><textarea name="message" rows={3} /></label>
-            <button className="button gold" type="submit">{t.form.submit}<b>→</b></button>
-            <small>{submitted ? t.form.success : `● ${t.form.note}`}</small>
+            <button className="button gold" type="submit" disabled={formStatus === "sending"}>{formStatus === "sending" ? t.form.sending : t.form.submit}<b>→</b></button>
+            <small role="status">{formStatus === "success" ? t.form.success : formStatus === "error" ? t.form.error : `● ${t.form.note}`}</small>
           </form>
         </div>
       </section>
